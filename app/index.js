@@ -2,6 +2,8 @@ const fs = require('fs');
 const ethers = require('ethers');
 const dotenv = require('dotenv');
 dotenv.config();
+const LitJsSdk = require('lit-js-sdk/build/index.node.js');
+const { signAuthMessage } = require('./encryptWithLit');
 
 // const rpcUrl = 'http://localhost:8545';
 // const defaultNetworkId = 31337;
@@ -44,6 +46,46 @@ const callMintMethod = async (guardians) => {
   const transferEvent = result.events.filter((event) => event.event === 'Transfer')[0];
   return transferEvent.args[2];
 }
+
+const encryptBackup = async (messageToEncrypt, ownerPk, accessNftId) => {
+  const litNodeClient = new LitJsSdk.LitNodeClient();
+  await litNodeClient.connect();
+
+  const chain = defaultNetworkName;
+  const authSig = await signAuthMessage(ownerPk, chain);
+
+  const accessControlConditions = [
+    {
+        contractAddress: accessNft.address,
+        standardContractType: 'ERC721',
+        chain,
+        method: 'balanceOf',
+        parameters: [':userAddress'],
+        returnValueTest: {
+          comparator: '>',
+          value: '0',
+        },
+    },
+  ];
+
+  // 1. Encryption
+  // <Blob> encryptedString
+  // <Uint8Array(32)> symmetricKey 
+  const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(messageToEncrypt);
+
+  // 2. Saving the Encrypted Content to the Lit Nodes
+  // <Unit8Array> encryptedSymmetricKey
+  const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+      accessControlConditions,
+      symmetricKey,
+      authSig,
+      chain,
+  });
+
+  return {
+    encryptedString, encryptedSymmetricKey
+  }
+}
 class Demo {
   constructor() {
     this.guardians = [
@@ -65,16 +107,14 @@ class Demo {
 
   async encryptWithLit() {
     console.log('\nEncrypting backup');
+    
     const data = fs.readFileSync('./app/backup.txt', 'utf8');
     console.log(`\n-> backup.txt:\n${data}\n`);
-    const { encryptedString, symmetricKey } = {
-      'encryptedString': 'aaaaaaaaaaaaaabbbbbbbbbbbbbbcccccccccccccc',
-    };
-    console.log(`-> Encrypted backup: ${encryptedString.slice(0, 30)} ... ${encryptedString.length - 30} symbols omitted`);
-    console.log(`-> Encrypted symmetric key: ${symmetricKey}`);
+    const { encryptedString, encryptedSymmetricKey } = await encryptBackup(data, owner1PrivateKey);
+    console.log(`-> Encrypted backup: ${encryptedString}`);
+    console.log(`-> Encrypted symmetric key: ${encryptedSymmetricKey}`);
     
-    const accessNftId = '1';
-    console.log(`-> Setting access control condition: 'Must be owner of AccessNFT #${accessNftId}'`);
+    console.log(`-> Setting access control condition: 'Must be owner of AccessNFT #${this.nftId}'`);
     
     console.log('\n');
   }
