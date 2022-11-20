@@ -14,6 +14,7 @@ describe("Social Recovery with AccessNFT", async () => {
   let account2;
   let account3;
   let account4;
+  let guardians;
 
   // quick fix to let gas reporter fetch accessNFTa from gas station & coinmarketcap
   before((done) => {
@@ -28,6 +29,7 @@ describe("Social Recovery with AccessNFT", async () => {
         account2 = signers[2];
         account3 = signers[3];
         account4 = signers[4];
+        guardians = [account1.address, account2.address, account3.address];
       }).then(() => done());
     })
     it("Should deploy AccessNFT", async () => {
@@ -40,14 +42,13 @@ describe("Social Recovery with AccessNFT", async () => {
 
     describe("Minting new AccessNFT", () => {
       it("should mint new token", async () => {
-        await accessNftContract.mint();
+        await accessNftContract.mint(guardians);
         expect(await accessNftContract.balanceOf(deployer.address)).to.equal(
           ethers.BigNumber.from(1)
         );
       });
 
-      it("should allow owner to assign guardians", async () => {
-        await accessNftContract.assignGuardian(account1.address);
+      it("should have guardians assigned", async () => {
         const guardians = await accessNftContract.getMyGuardians();
         const guardianAddresses = guardians.map((g) => g[0]);
         expect(guardianAddresses).to.contain(account1.address);
@@ -55,10 +56,7 @@ describe("Social Recovery with AccessNFT", async () => {
 
       it("should allow guardians to transfer token to a new address", async () => {
         const accessNFT = await accessNFTFactory.deploy();
-        await accessNFT.mint();
-        await accessNFT.assignGuardian(account1.address);
-        await accessNFT.assignGuardian(account2.address);
-        await accessNFT.assignGuardian(account3.address);
+        await accessNFT.mint(guardians);
 
         let currentOwner = await accessNFT.ownerOf(1);
         expect(currentOwner).to.be.equal(deployer.address);

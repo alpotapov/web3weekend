@@ -33,23 +33,27 @@ contract AccessNFT is ERC721 {
         _tokenIds.increment();
     }
 
-    function mint() external returns (uint256) {
-        require(tokenOf[msg.sender] == 0, "AccessNFT: Should not own a token already");
-        uint256 newTokenId = _tokenIds.current();
-        _safeMint(msg.sender, newTokenId);
-        tokenOf[msg.sender] = newTokenId;
-
-        _tokenIds.increment();
-        return newTokenId;
-    }
-
-    function assignGuardian(address _newGuardian) external {
+    function assignGuardian(address _newGuardian) public {
         require(tokenOf[msg.sender] != 0, "AccessNFT: Should own a token");
 
         Guardian memory newGuardian = Guardian(_newGuardian, true);
         guardiansOfToken[tokenOf[msg.sender]].push(newGuardian);
 
         emit GuardianAssigned(_newGuardian, msg.sender);
+    }
+
+    function mint(address[] memory _guardians) external returns (uint256) {
+        require(tokenOf[msg.sender] == 0, "AccessNFT: Should not own a token already");
+        uint256 newTokenId = _tokenIds.current();
+        _safeMint(msg.sender, newTokenId);
+        tokenOf[msg.sender] = newTokenId;
+
+        for(uint256 i = 0; i < _guardians.length; i++) {
+            assignGuardian(_guardians[i]);
+        }
+
+        _tokenIds.increment();
+        return newTokenId;
     }
 
     function getMyGuardians()
