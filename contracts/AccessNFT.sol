@@ -9,6 +9,8 @@ contract AccessNFT is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
+    uint256 public CONFIRMATIONS_REQUIRED = 1;
+
     mapping(address => uint256) public tokenOf;
 
     struct Guardian {
@@ -87,7 +89,7 @@ contract AccessNFT is ERC721 {
             }
         }
 
-        ExternalTransfer memory newET = ExternalTransfer(_old, _new, 0, 2, false);
+        ExternalTransfer memory newET = ExternalTransfer(_old, _new, 0, CONFIRMATIONS_REQUIRED, false);
         externalTransfersOfToken[tokenId].push(newET);
         return numTransfers;
     }

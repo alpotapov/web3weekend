@@ -1,19 +1,58 @@
 const fs = require('fs');
+const ethers = require('ethers');
+const dotenv = require('dotenv');
+dotenv.config();
+
+// const rpcUrl = 'http://localhost:8545';
+// const defaultNetworkId = 31337;
+// const defaultNetworkName = 'localhost';
+// const { contracts } = artifacts[defaultNetworkId][defaultNetworkName];
+// const { AccessNFT } = contracts;
+
+
+const privateKey = process.env.PRIVATE_KEY;
+const guardianPrivateKey = process.env.PERSONA_1_PRIVATE_KEY;
+const guardianAddress = '0x8f196bEbF800e6e9c0382F49E56862bFDCd5aF4a';
+// const defaultNetworkId = 31415;
+// const defaultNetworkName = 'wallaby';
+const defaultNetworkId = 5;
+const defaultNetworkName = 'goerli';
+const accessNft = require(`../deployments/${defaultNetworkName}/AccessNFT.json`);
+const rpcUrl = process.env.GOERLI_INFURA_RPC;
+// const rpcUrl = 'https://wallaby.node.glif.io/rpc/v0';
+
+
+const callMintMethod = async (guardians) => {
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+  console.log({ privateKey });
+  const wallet = new ethers.Wallet(privateKey, provider);
+  const contract = new ethers.Contract(
+    accessNft.address,
+    new ethers.utils.Interface(accessNft.abi),
+    wallet
+  );
+
+  const tx = await contract.mint(guardians);
+  const result = await tx.wait();
+
+  result.events.map((event) => {
+    console.log(`-> Event Log: ${event.event}(${event.args})`);
+  });
+
+  console.log(result.event.filter(((event) => event.event === 'Transfer')));
+  return 1;
+}
 class Demo {
   constructor() {
     this.guardians = [
-      '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
-      '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-      '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
+      guardianAddress,
     ]
 
     console.log('Available methods:\n-> mintAccessNFT, encryptWithLit, uploadToFilecoin, transferAccessNFT, restoreBackup');
   }
   async mintAccessNFT () {
     console.log('\nCalling mint method of AccessNFT contract');
-    this.guardians.map((g, index) => console.log(`-> Assigned guardian ${index}: ${g}`));
-  
-    const accessNFTId = 1;
+    const accessNFTId = await callMintMethod(this.guardians);
     console.log(`-> Minted AccessNFT with id ${accessNFTId}`);
 
     console.log('\n');

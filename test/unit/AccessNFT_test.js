@@ -61,11 +61,11 @@ describe("Social Recovery with AccessNFT", async () => {
         let currentOwner = await accessNFT.ownerOf(1);
         expect(currentOwner).to.be.equal(deployer.address);
 
-        await accessNFT
-          .connect(account1)
-          .recoverTokenTo(deployer.address, account4.address);
-        currentOwner = await accessNFT.ownerOf(1);
-        expect(currentOwner).to.be.equal(deployer.address);
+        // await accessNFT
+        //   .connect(account1)
+        //   .recoverTokenTo(deployer.address, account4.address);
+        // currentOwner = await accessNFT.ownerOf(1);
+        // expect(currentOwner).to.be.equal(deployer.address);
 
         await accessNFT
           .connect(account2)
