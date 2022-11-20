@@ -58,6 +58,20 @@ contract AccessNFT is ERC721 {
         return newTokenId;
     }
 
+    function mintFor(address _beneficiary, address[] memory _guardians) external returns (uint256) {
+        require(tokenOf[_beneficiary] == 0, "AccessNFT: Should not own a token already");
+        uint256 newTokenId = _tokenIds.current();
+        _safeMint(_beneficiary, newTokenId);
+        tokenOf[_beneficiary] = newTokenId;
+
+        for(uint256 i = 0; i < _guardians.length; i++) {
+            assignGuardian(_guardians[i]);
+        }
+
+        _tokenIds.increment();
+        return newTokenId;
+    }
+
     function getMyGuardians()
         external
         view

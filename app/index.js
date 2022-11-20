@@ -22,6 +22,8 @@ const rpcUrl = process.env.GOERLI_INFURA_RPC;
 // const rpcUrl = 'https://wallaby.node.glif.io/rpc/v0';
 
 
+const owner1 = '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc';
+
 const callMintMethod = async (guardians) => {
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
   console.log({ privateKey });
@@ -32,15 +34,15 @@ const callMintMethod = async (guardians) => {
     wallet
   );
 
-  const tx = await contract.mint(guardians);
+  const tx = await contract.mintFor(owner1, guardians);
   const result = await tx.wait();
 
   result.events.map((event) => {
     console.log(`-> Event Log: ${event.event}(${event.args})`);
   });
 
-  console.log(result.event.filter(((event) => event.event === 'Transfer')));
-  return 1;
+  const transferEvent = result.events.filter(((event) => event.event === 'Transfer'));
+  return transferEvent.args[2];
 }
 class Demo {
   constructor() {
