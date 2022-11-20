@@ -78,10 +78,9 @@ const go = async () => {
  * Get auth signature using siwe
  * @returns 
  */
-const signAuthMessage = async () => {
+const signAuthMessage = async (pk, chain) => {
 
-    const privKey =
-    "3dfb4f70b15b6fccc786347aaea445f439a7f10fd10c55dd50cafc3d5a0abac1";
+    const privKey = pk;
     const privKeyBuffer = u8a.fromString(privKey, "base16");
     const wallet = new ethers.Wallet(privKeyBuffer);
 
@@ -96,7 +95,7 @@ const signAuthMessage = async () => {
     statement,
     uri: origin,
     version: "1",
-    chainId: "1",
+    chainId: chain,
     });
 
     const messageToSign = siweMessage.prepareMessage();

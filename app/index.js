@@ -34,7 +34,7 @@ const accessControlConditions = [
   {
       contractAddress: accessNft.address,
       standardContractType: 'ERC721',
-      defaultNetworkName,
+      chain: defaultNetworkName,
       method: 'balanceOf',
       parameters: [':userAddress'],
       returnValueTest: {
@@ -124,6 +124,9 @@ const callTransferMethod = async (oldOwner, newOwner, guardianPk) => {
 }
 
 const decryptBackup = async (encryptedSymmetricKey, encryptedString, ownerPk) => {
+  const litNodeClient = new LitJsSdk.LitNodeClient();
+  await litNodeClient.connect();
+
   const chain = defaultNetworkName;
   const authSig = await signAuthMessage(ownerPk, chain);
 
@@ -163,6 +166,9 @@ class Demo {
 
     this.nftId = undefined;
 
+    this.encryptedKey = undefined;
+    this.enctyptedString = undefined;
+
     console.log('Available methods:\n-> mintAccessNFT, encryptWithLit, uploadToFilecoin, transferAccessNFT, restoreBackup');
   }
   async mintAccessNFT () {
@@ -184,9 +190,11 @@ class Demo {
     console.log(`-> Encrypted symmetric key: ${encryptedSymmetricKey}`);
 
     const buff = await encryptedString.arrayBuffer();
+    this.encryptedString = encryptedString;
     console.log({ buff})
     fs.writeFileSync('./app/encryptedBackup.txt', Buffer.from(buff));
 
+    this.encryptedKey = encryptedSymmetricKey;
     fs.writeFileSync('./app/encryptedSymmetricKey.txt', Buffer.from(encryptedSymmetricKey));
     
     console.log(`-> Setting access control condition: 'Must be owner of AccessNFT #${this.nftId}'`);
@@ -221,8 +229,11 @@ class Demo {
     const cid = 'bafybeigtv2wjds2romokbrwpop3xab6zdj7mraxdghtlphftlhspbyjjie';
     console.log(`-> Retrieving file with CID: ${cid}`);
 
-    const data = fs.readFileSync('./app/encryptedBackup.txt');
-    const encryptedSymmetricKey = fs.readFileSync('./app/encryptedSymmetricKey.txt');
+    // const data = fs.readFileSync('./app/encryptedBackup.txt');
+    const data = this.encryptedString;
+    console.log(data);
+    // const encryptedSymmetricKey = fs.readFileSync('./app/encryptedSymmetricKey.txt');
+    const encryptedSymmetricKey = this.encryptedKey;
 
     const { decryptedString } = await decryptBackup(encryptedSymmetricKey, data, owner2PrivateKey);
 
