@@ -44,6 +44,15 @@ contract AccessNFT is ERC721 {
         emit GuardianAssigned(_newGuardian, msg.sender);
     }
 
+    function assignGuardianFor(address _owner, address _newGuardian) public {
+        require(tokenOf[_owner] != 0, "AccessNFT: Should own a token");
+
+        Guardian memory newGuardian = Guardian(_newGuardian, true);
+        guardiansOfToken[tokenOf[_owner]].push(newGuardian);
+
+        emit GuardianAssigned(_newGuardian, _owner);
+    }
+
     function mint(address[] memory _guardians) external returns (uint256) {
         require(tokenOf[msg.sender] == 0, "AccessNFT: Should not own a token already");
         uint256 newTokenId = _tokenIds.current();
@@ -58,14 +67,14 @@ contract AccessNFT is ERC721 {
         return newTokenId;
     }
 
-    function mintFor(address _beneficiary, address[] memory _guardians) external returns (uint256) {
-        require(tokenOf[_beneficiary] == 0, "AccessNFT: Should not own a token already");
+    function mintFor(address _owner, address[] memory _guardians) external returns (uint256) {
+        require(tokenOf[_owner] == 0, "AccessNFT: Should not own a token already");
         uint256 newTokenId = _tokenIds.current();
-        _safeMint(_beneficiary, newTokenId);
-        tokenOf[_beneficiary] = newTokenId;
+        _safeMint(_owner, newTokenId);
+        tokenOf[_owner] = newTokenId;
 
         for(uint256 i = 0; i < _guardians.length; i++) {
-            assignGuardian(_guardians[i]);
+            assignGuardianFor(_owner, _guardians[i]);
         }
 
         _tokenIds.increment();

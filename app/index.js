@@ -22,11 +22,11 @@ const rpcUrl = process.env.GOERLI_INFURA_RPC;
 // const rpcUrl = 'https://wallaby.node.glif.io/rpc/v0';
 
 
-const owner1 = '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc';
+const owner1 = '0x8f196bEbF800e6e9c0382F49E56862bFDCd5aF4a';
+const owner1PrivateKey = process.env.PERSONA_1_PRIVATE_KEY;
 
 const callMintMethod = async (guardians) => {
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-  console.log({ privateKey });
   const wallet = new ethers.Wallet(privateKey, provider);
   const contract = new ethers.Contract(
     accessNft.address,
@@ -41,21 +41,23 @@ const callMintMethod = async (guardians) => {
     console.log(`-> Event Log: ${event.event}(${event.args})`);
   });
 
-  const transferEvent = result.events.filter(((event) => event.event === 'Transfer'));
+  const transferEvent = result.events.filter((event) => event.event === 'Transfer')[0];
   return transferEvent.args[2];
 }
 class Demo {
   constructor() {
     this.guardians = [
       guardianAddress,
-    ]
+    ];
+
+    this.nftId = undefined;
 
     console.log('Available methods:\n-> mintAccessNFT, encryptWithLit, uploadToFilecoin, transferAccessNFT, restoreBackup');
   }
   async mintAccessNFT () {
     console.log('\nCalling mint method of AccessNFT contract');
-    const accessNFTId = await callMintMethod(this.guardians);
-    console.log(`-> Minted AccessNFT with id ${accessNFTId}`);
+    this.nftId = await callMintMethod(this.guardians);
+    console.log(`-> Minted AccessNFT with id ${this.nftId}`);
 
     console.log('\n');
     return '';
