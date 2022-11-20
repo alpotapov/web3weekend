@@ -1,3 +1,4 @@
+const fs = require('fs');
 class Demo {
   constructor() {
     this.guardians = [
@@ -5,6 +6,8 @@ class Demo {
       '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
       '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
     ]
+
+    console.log('Available methods:\n-> mintAccessNFT, encryptWithLit, uploadToFilecoin, transferAccessNFT, restoreBackup');
   }
   async mintAccessNFT () {
     console.log('\nCalling mint method of AccessNFT contract');
@@ -18,7 +21,9 @@ class Demo {
   }
 
   async encryptWithLit() {
-    console.log('\nEncrypting backup.txt with symmetric key');
+    console.log('\nEncrypting backup');
+    const data = fs.readFileSync('./app/backup.txt', 'utf8');
+    console.log(`\n-> backup.txt:\n${data}\n`);
     const { encryptedString, symmetricKey } = {
       'encryptedString': 'aaaaaaaaaaaaaabbbbbbbbbbbbbbcccccccccccccc',
     };
@@ -26,7 +31,7 @@ class Demo {
     console.log(`-> Encrypted symmetric key: ${symmetricKey}`);
     
     const accessNftId = '1';
-    console.log(`Setting access control condition: 'Must be owner of AccessNFT #${accessNftId}'`);
+    console.log(`-> Setting access control condition: 'Must be owner of AccessNFT #${accessNftId}'`);
     
     console.log('\n');
   }
@@ -47,7 +52,7 @@ class Demo {
 
   async transferAccessNFT() {
     const newAccount = '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65';
-    this.guardians.map((g, index) => {
+    this.guardians.slice(0, 2).map((g, index) => {
       console.log(`-> Guardian ${index} is transferring AccessNFT to ${newAccount}`)
     });
 
