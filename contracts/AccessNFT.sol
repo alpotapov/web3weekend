@@ -27,9 +27,12 @@ contract AccessNFT is ERC721 {
     }
 
     event GuardianAssigned(address indexed guardian, address indexed tokenOwner);
+    event CIDUpdated(uint256 tokenId, string cid);
 
     mapping(uint256 => Guardian[]) public guardiansOfToken;
     mapping(uint256 => ExternalTransfer[]) public externalTransfersOfToken;
+
+    mapping(uint256 => string) public tokenToCid;
 
     constructor() ERC721("AccessNFT", "ACCESS") {
         _tokenIds.increment();
@@ -79,6 +82,15 @@ contract AccessNFT is ERC721 {
 
         _tokenIds.increment();
         return newTokenId;
+    }
+
+    function setTokenCid(uint256 _tokenId, string memory _cid) external {
+        tokenToCid[_tokenId] = _cid;
+        emit CIDUpdated(_tokenId, _cid);
+    }
+
+    function getTokenCid(uint256 _tokenId) external view returns (string memory) {
+        return tokenToCid[_tokenId];
     }
 
     function getMyGuardians()
