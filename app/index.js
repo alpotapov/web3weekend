@@ -7,8 +7,7 @@ class Demo {
     ]
   }
   async mintAccessNFT () {
-    console.log('\n');
-    console.log('Calling mint method of AccessNFT contract');
+    console.log('\nCalling mint method of AccessNFT contract');
     this.guardians.map((g, index) => console.log(`-> Assigned guardian ${index}: ${g}`));
   
     const accessNFTId = 1;
@@ -19,8 +18,7 @@ class Demo {
   }
 
   async encryptWithLit() {
-    console.log('\n');
-    console.log('Encrypting backup.txt with symmetric key');
+    console.log('\nEncrypting backup.txt with symmetric key');
     const { encryptedString, symmetricKey } = {
       'encryptedString': 'aaaaaaaaaaaaaabbbbbbbbbbbbbbcccccccccccccc',
     };
@@ -34,7 +32,7 @@ class Demo {
   }
   
   async uploadToFilecoin() {
-    console.log('Uploading encrypted backup to Filecoin');
+    console.log('\nUploading encrypted backup to Filecoin');
     const cid = 'aaaaaaaaaaaaabbbbbbbbbbbbbbcccccccccccccc';
     console.log(`-> CID: ${cid.slice(0, 30)} ... ${cid.length - 30} symbols omitted`);
     
@@ -57,7 +55,7 @@ class Demo {
   }
 
   async restoreBackup() {
-    console.log('Restoring backup from Filecoin');
+    console.log('\nRestoring backup from Filecoin');
     const cid = 'aaaaaaaaaaaaabbbbbbbbbbbbbbcccccccccccccc';
     console.log(`-> Retrieving file with CID: ${cid.slice(0, 30)} ... ${cid.length - 30} symbols omitted`);
 
